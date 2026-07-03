@@ -1,75 +1,157 @@
-# React + TypeScript + Vite
+# ConvertCart Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend for the ConvertCart expense tracker. The app lets users create expenses, filter expense records, delete expenses, and view category-wise spending summaries.
 
-Currently, two official plugins are available:
+## Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Vite
+- React 19
+- TypeScript
+- Tailwind CSS v4
+- TanStack React Query
+- Axios
+- Joi
 
-## React Compiler
+## Prerequisites
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Node.js 20 or later
+- npm
+- A running backend API for categories, expenses, and summaries
 
-## Expanding the ESLint configuration
+## Local Setup
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+1. Install dependencies:
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+2. Create a `.env` file in the project root:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```bash
+VITE_BASE_URL=
+```
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Update the URL to match your backend server.
 
+3. Start the development server:
+
+```bash
+npm run dev
+```
+
+4. Open the local Vite URL shown in the terminal, usually:
+
+```bash
+http://localhost:5173
+```
+
+## Available Scripts
+
+```bash
+npm run dev
+```
+
+Starts the Vite development server.
+
+```bash
+npm run build
+```
+
+Runs TypeScript build checks and creates the production build.
+
+```bash
+npm run lint
+```
+
+Runs ESLint across the project.
+
+```bash
+npm run preview
+```
+
+Serves the production build locally for preview.
+
+## Environment Variables
+
+| Variable | Required | Description |
+| --- | --- | --- |
+| `VITE_BASE_URL` | Yes | Base URL for the backend API used by Axios. |
+
+The app throws an error during startup if `VITE_BASE_URL` is missing.
+
+## Folder Structure
+
+```text
+frontend/
+|-- public/
+|   |-- favicon.svg
+|   `-- icons.svg
+|-- src/
+|   |-- assets/
+|   |   |
+|   |-- components/
+|   |   `-- expenses/
+|   |       |-- CategorySummary.tsx
+|   |       |-- DeleteExpenseModal.tsx
+|   |       |-- ExpenseDialog.tsx
+|   |       |-- ExpenseFilters.tsx
+|   |       |-- ExpenseForm.tsx
+|   |       `-- ExpenseList.tsx
+|   |-- config/
+|   |   `-- axios.ts
+|   |-- hooks/
+|   |   `-- useDebounce.ts
+|   |-- lib/
+|   |   `-- toast.tsx
+|   |-- services/
+|   |   `-- expense.ts
+|   |-- validations/
+|   |   `-- expense.ts
+|   |-- App.css
+|   |-- App.tsx
+|   |-- index.css
+|   `-- main.tsx
+|-- AGENTS.md
+|-- eslint.config.js
+|-- index.html
+|-- package.json
+|-- package-lock.json
+|-- tsconfig.app.json
+|-- tsconfig.json
+|-- tsconfig.node.json
+`-- vite.config.ts
+```
+
+## Source Overview
+
+- `src/main.tsx` mounts the React app and configures React Query.
+- `src/App.tsx` contains the main expense tracker layout and page-level state.
+- `src/config/axios.ts` creates the shared Axios client using `VITE_BASE_URL`.
+- `src/services/expense.ts` contains expense API calls, response types, query keys, and React Query hooks.
+- `src/components/expenses/` contains the expense form, filters, list, dialog, delete modal, and summary UI.
+- `src/validations/expense.ts` contains Joi validation for expense form data.
+- `src/index.css` imports Tailwind CSS v4.
+
+## API Expectations
+
+The frontend expects the backend API to expose these endpoints relative to `VITE_BASE_URL`:
+
+```text
+GET    /categories
+GET    /expenses
+POST   /expenses
+DELETE /expenses/:expenseId
+GET    /summary
+```
+
+Responses are expected to use a `success`, `message`, and `data` shape.
+
+## Validation Before Commit
+
+Run these checks before committing frontend changes:
+
+```bash
+npm run lint
+npm run build
 ```
