@@ -6,7 +6,6 @@ type ExpenseListProps = {
   isFetching: boolean;
   isError: boolean;
   errorMessage?: string;
-  deletingId: string | null;
   onDeleteRequest: (expense: Expense) => void;
 };
 
@@ -42,7 +41,6 @@ export function ExpenseList({
   isFetching,
   isError,
   errorMessage,
-  deletingId,
   onDeleteRequest,
 }: ExpenseListProps) {
   if (isLoading) {
@@ -101,12 +99,11 @@ export function ExpenseList({
               {expense.note ?? "No note"}
             </p>
             <button
-              className="mt-4 w-full rounded-lg border border-red-200 px-4 py-2.5 text-sm font-semibold text-red-700 transition hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-200 disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-4 w-full rounded-lg border border-red-200 px-4 py-2.5 text-sm font-semibold text-red-700 transition hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-200"
               type="button"
               onClick={() => onDeleteRequest(expense)}
-              disabled={deletingId === expense.id}
             >
-              {deletingId === expense.id ? "Deleting..." : "Delete"}
+              Delete
             </button>
           </article>
         ))}
@@ -142,12 +139,11 @@ export function ExpenseList({
                 </td>
                 <td className="px-5 py-4 text-right">
                   <button
-                    className="rounded-lg border border-red-200 px-3 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-200 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="rounded-lg border border-red-200 px-3 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-200"
                     type="button"
                     onClick={() => onDeleteRequest(expense)}
-                    disabled={deletingId === expense.id}
                   >
-                    {deletingId === expense.id ? "Deleting..." : "Delete"}
+                    Delete
                   </button>
                 </td>
               </tr>

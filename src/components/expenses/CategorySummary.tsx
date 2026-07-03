@@ -1,12 +1,7 @@
 import { useState } from "react";
-import type { ExpenseSummaryItem } from "../../services/expense";
+import { getApiErrorMessage, useExpenseSummary } from "../../services/expense";
 
 type CategorySummaryProps = {
-  summary: ExpenseSummaryItem[];
-  isLoading: boolean;
-  isFetching: boolean;
-  isError: boolean;
-  errorMessage?: string;
   className?: string;
   variant?: "panel" | "disclosure";
 };
@@ -21,15 +16,12 @@ const joinClassNames = (...classNames: Array<string | undefined>) =>
   classNames.filter(Boolean).join(" ");
 
 export function CategorySummary({
-  summary,
-  isLoading,
-  isFetching,
-  isError,
-  errorMessage,
   className,
   variant = "panel",
 }: CategorySummaryProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const summaryQuery = useExpenseSummary();
+  const summary = summaryQuery.data ?? [];
   const maxSpend = Math.max(
     ...summary.map((item) => Number(item.totalSpend)),
     0,
@@ -41,7 +33,7 @@ export function CategorySummary({
 
   const renderSummaryContent = (showTotalCard: boolean) => (
     <>
-      {isLoading ? (
+      {summaryQuery.isLoading ? (
         <div className="space-y-4">
           {Array.from({ length: 5 }).map((_, index) => (
             <div className="space-y-2" key={index}>
@@ -52,13 +44,13 @@ export function CategorySummary({
         </div>
       ) : null}
 
-      {isError ? (
+      {summaryQuery.isError ? (
         <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-          {errorMessage ?? "Unable to load summary"}
+          {getApiErrorMessage(summaryQuery.error)}
         </div>
       ) : null}
 
-      {!isLoading && !isError ? (
+      {!summaryQuery.isLoading && !summaryQuery.isError ? (
         <div className="space-y-4">
           {showTotalCard ? (
             <div className="rounded-lg bg-slate-950 p-4 text-white">
@@ -133,7 +125,7 @@ export function CategorySummary({
             <span className="mt-1 block text-base font-semibold text-slate-950">
               Category summary
             </span>
-            {isFetching && !isLoading ? (
+            {summaryQuery.isFetching && !summaryQuery.isLoading ? (
               <span className="mt-1 block text-xs font-semibold text-emerald-700">
                 Updating
               </span>
@@ -142,9 +134,9 @@ export function CategorySummary({
 
           <span className="shrink-0 text-right">
             <span className="block text-sm font-semibold text-slate-950">
-              {isLoading
+              {summaryQuery.isLoading
                 ? "Loading..."
-                : isError
+                : summaryQuery.isError
                   ? "Unavailable"
                   : formatAmount(String(totalSpend))}
             </span>
@@ -180,7 +172,7 @@ export function CategorySummary({
               Category summary
             </h2>
           </div>
-          {isFetching && !isLoading ? (
+          {summaryQuery.isFetching && !summaryQuery.isLoading ? (
             <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
               Updating
             </span>

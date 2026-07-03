@@ -1,33 +1,41 @@
-﻿import { useEffect } from "react";
-import type { Category, CreateExpenseRequest } from "../../services/expense";
+import { useQueryClient } from "@tanstack/react-query";
+import showToast from "../../lib/toast";
+import {
+  expenseQueryKeys,
+  getApiErrorMessage,
+  useCategories,
+  useCreateExpense,
+  type CreateExpenseRequest,
+} from "../../services/expense";
 import { ExpenseForm } from "./ExpenseForm";
 
 type ExpenseDialogProps = {
   open: boolean;
-  categories: Category[];
-  isCategoriesLoading: boolean;
-  categoriesError?: string;
-  isSubmitting: boolean;
-  submitError?: string;
   onClose: () => void;
-  onSubmit: (input: CreateExpenseRequest) => Promise<boolean>;
 };
 
-export function ExpenseDialog({
-  open,
-  categories,
-  isCategoriesLoading,
-  categoriesError,
-  isSubmitting,
-  submitError,
-  onClose,
-  onSubmit,
-}: ExpenseDialogProps) {
-  useEffect(() => {
-    if (!open) {
-      return;
+export function ExpenseDialog({ open, onClose }: ExpenseDialogProps) {
+  const queryClient = useQueryClient();
+  const categoriesQuery = useCategories();
+
+  const createExpenseMutation = useCreateExpense(
+    () => {
+      queryClient.invalidateQueries({ queryKey: expenseQueryKeys.expenses() });
+      queryClient.invalidateQueries({ queryKey: expenseQueryKeys.summary });
+      onClose();
+      showToast("Expense created successfully", "success");
+    },
+    (error) => showToast(getApiErrorMessage(error), "error"),
+  );
+
+  const handleSubmit = async (input: CreateExpenseRequest) => {
+    try {
+      await createExpenseMutation.mutateAsync(input);
+      return true;
+    } catch {
+      return false;
     }
-  }, [onClose, open]);
+  };
 
   if (!open) {
     return null;
@@ -70,13 +78,21 @@ export function ExpenseDialog({
         </div>
 
         <ExpenseForm
-          categories={categories}
-          isCategoriesLoading={isCategoriesLoading}
-          categoriesError={categoriesError}
-          isSubmitting={isSubmitting}
-          submitError={submitError}
+          categories={categoriesQuery.data ?? []}
+          isCategoriesLoading={categoriesQuery.isLoading}
+          categoriesError={
+            categoriesQuery.isError
+              ? getApiErrorMessage(categoriesQuery.error)
+              : undefined
+          }
+          isSubmitting={createExpenseMutation.isPending}
+          submitError={
+            createExpenseMutation.isError
+              ? getApiErrorMessage(createExpenseMutation.error)
+              : undefined
+          }
           onCancel={onClose}
-          onSubmit={onSubmit}
+          onSubmit={handleSubmit}
         />
       </section>
     </div>

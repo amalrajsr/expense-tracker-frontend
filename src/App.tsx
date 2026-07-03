@@ -1,27 +1,19 @@
 import { useMemo, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 import { CategorySummary } from "./components/expenses/CategorySummary";
 import { DeleteExpenseModal } from "./components/expenses/DeleteExpenseModal";
 import { ExpenseDialog } from "./components/expenses/ExpenseDialog";
 import { ExpenseFilters } from "./components/expenses/ExpenseFilters";
 import { ExpenseList } from "./components/expenses/ExpenseList";
 import { useDebounce } from "./hooks/useDebounce";
-import showToast from "./lib/toast";
 import {
-  expenseQueryKeys,
   getApiErrorMessage,
   useCategories,
-  useCreateExpense,
-  useDeleteExpense,
   useExpenses,
-  useExpenseSummary,
-  type CreateExpenseRequest,
   type Expense,
   type ListExpensesQuery,
 } from "./services/expense";
 
 function App() {
-  const queryClient = useQueryClient();
   const [appliedFilters, setAppliedFilters] = useState<ListExpensesQuery>({});
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -39,7 +31,6 @@ function App() {
 
   const categoriesQuery = useCategories();
   const expensesQuery = useExpenses(queryFilters);
-  const summaryQuery = useExpenseSummary();
 
   const activeFilterCount = useMemo(
     () =>
@@ -48,62 +39,6 @@ function App() {
       ).length,
     [queryFilters],
   );
-
-  const refreshExpenseData = () => {
-    queryClient.invalidateQueries({ queryKey: expenseQueryKeys.expenses() });
-    queryClient.invalidateQueries({ queryKey: expenseQueryKeys.summary });
-  };
-
-  const createExpenseMutation = useCreateExpense(
-    () => {
-      refreshExpenseData();
-      setIsDialogOpen(false);
-      showToast("Expense created successfully", "success");
-    },
-    (error) => showToast(getApiErrorMessage(error), "error"),
-  );
-
-  const deleteExpenseMutation = useDeleteExpense(
-    () => {
-      refreshExpenseData();
-      setExpensePendingDelete(null);
-      showToast("Expense deleted successfully", "success");
-    },
-    (error) => showToast(getApiErrorMessage(error), "error"),
-  );
-
-  const handleCreateExpense = async (input: CreateExpenseRequest) => {
-    try {
-      await createExpenseMutation.mutateAsync(input);
-      return true;
-    } catch {
-      return false;
-    }
-  };
-
-  const handleDeleteRequest = (expense: Expense) => {
-    deleteExpenseMutation.reset();
-    setExpensePendingDelete(expense);
-  };
-
-  const handleCancelDelete = () => {
-    if (!deleteExpenseMutation.isPending) {
-      deleteExpenseMutation.reset();
-      setExpensePendingDelete(null);
-    }
-  };
-
-  const handleConfirmDelete = async () => {
-    if (!expensePendingDelete) {
-      return;
-    }
-
-    try {
-      await deleteExpenseMutation.mutateAsync(expensePendingDelete.id);
-    } catch {
-      // Error state is exposed by the mutation and rendered in the modal.
-    }
-  };
 
   const handleResetFilters = () => {
     setSearchTerm("");
@@ -164,15 +99,7 @@ function App() {
             onReset={handleResetFilters}
           />
 
-          <CategorySummary
-            className="lg:hidden"
-            variant="disclosure"
-            summary={summaryQuery.data ?? []}
-            isLoading={summaryQuery.isLoading}
-            isFetching={summaryQuery.isFetching}
-            isError={summaryQuery.isError}
-            errorMessage={getApiErrorMessage(summaryQuery.error)}
-          />
+          <CategorySummary className="lg:hidden" variant="disclosure" />
 
           <div className="scrollbar-hide lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:pr-1">
             <ExpenseList
@@ -181,12 +108,7 @@ function App() {
               isFetching={expensesQuery.isFetching}
               isError={expensesQuery.isError}
               errorMessage={getApiErrorMessage(expensesQuery.error)}
-              deletingId={
-                deleteExpenseMutation.isPending
-                  ? expensePendingDelete?.id ?? null
-                  : null
-              }
-              onDeleteRequest={handleDeleteRequest}
+              onDeleteRequest={setExpensePendingDelete}
             />
           </div>
         </section>
@@ -194,43 +116,14 @@ function App() {
         <CategorySummary
           className="hidden lg:flex lg:h-full lg:min-h-0 lg:flex-col"
           variant="panel"
-          summary={summaryQuery.data ?? []}
-          isLoading={summaryQuery.isLoading}
-          isFetching={summaryQuery.isFetching}
-          isError={summaryQuery.isError}
-          errorMessage={getApiErrorMessage(summaryQuery.error)}
         />
       </main>
 
-      <ExpenseDialog
-        open={isDialogOpen}
-        categories={categoriesQuery.data ?? []}
-        isCategoriesLoading={categoriesQuery.isLoading}
-        categoriesError={
-          categoriesQuery.isError
-            ? getApiErrorMessage(categoriesQuery.error)
-            : undefined
-        }
-        isSubmitting={createExpenseMutation.isPending}
-        submitError={
-          createExpenseMutation.isError
-            ? getApiErrorMessage(createExpenseMutation.error)
-            : undefined
-        }
-        onClose={() => setIsDialogOpen(false)}
-        onSubmit={handleCreateExpense}
-      />
+      <ExpenseDialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)} />
 
       <DeleteExpenseModal
         expense={expensePendingDelete}
-        isDeleting={deleteExpenseMutation.isPending}
-        errorMessage={
-          deleteExpenseMutation.isError
-            ? getApiErrorMessage(deleteExpenseMutation.error)
-            : undefined
-        }
-        onCancel={handleCancelDelete}
-        onConfirm={handleConfirmDelete}
+        onClose={() => setExpensePendingDelete(null)}
       />
     </div>
   );
