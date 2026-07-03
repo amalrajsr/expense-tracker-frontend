@@ -1,9 +1,9 @@
-import axios from "axios";
+﻿import axios from "axios";
 
-const baseURL = import.meta.env.VITE_.NEXT_PUBLIC_BASE_URL;
+const baseURL = import.meta.env.VITE_BASE_URL;
 
 if (!baseURL) {
-  throw new Error("NEXT_PUBLIC_BASE_URL is not configured");
+  throw new Error("VITE_BASE_URL is not configured");
 }
 
 const api = axios.create({
