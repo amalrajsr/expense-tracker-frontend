@@ -5,7 +5,6 @@ type ExpenseListProps = {
   isLoading: boolean;
   isFetching: boolean;
   isError: boolean;
-  errorMessage?: string;
   onDeleteRequest: (expense: Expense) => void;
 };
 
@@ -40,7 +39,6 @@ export function ExpenseList({
   isLoading,
   isFetching,
   isError,
-  errorMessage,
   onDeleteRequest,
 }: ExpenseListProps) {
   if (isLoading) {
@@ -50,7 +48,7 @@ export function ExpenseList({
   if (isError) {
     return (
       <div className="rounded-xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">
-        {errorMessage ?? "Unable to load expenses"}
+        Failed to load expenses
       </div>
     );
   }

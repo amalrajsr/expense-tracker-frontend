@@ -3,7 +3,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import showToast from "../../lib/toast";
 import {
   expenseQueryKeys,
-  getApiErrorMessage,
   useDeleteExpense,
   type Expense,
 } from "../../services/expense";
@@ -31,10 +30,9 @@ export function DeleteExpenseModal({
       onClose();
       showToast("Expense deleted successfully", "success");
     },
-    (error) => showToast(getApiErrorMessage(error), "error"),
+    () => showToast("Failed to delete expense", "error"),
   );
   const {
-    error,
     isError,
     isPending: isDeleting,
     mutateAsync,
@@ -121,7 +119,7 @@ export function DeleteExpenseModal({
 
         {isError ? (
           <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {getApiErrorMessage(error)}
+            Failed to delete expense
           </div>
         ) : null}
 

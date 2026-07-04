@@ -2,7 +2,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import showToast from "../../lib/toast";
 import {
   expenseQueryKeys,
-  getApiErrorMessage,
   useCategories,
   useCreateExpense,
   type CreateExpenseRequest,
@@ -25,7 +24,7 @@ export function ExpenseDialog({ open, onClose }: ExpenseDialogProps) {
       onClose();
       showToast("Expense created successfully", "success");
     },
-    (error) => showToast(getApiErrorMessage(error), "error"),
+    () => showToast("Failed to create expense", "error"),
   );
 
   const handleSubmit = async (input: CreateExpenseRequest) => {
@@ -82,13 +81,13 @@ export function ExpenseDialog({ open, onClose }: ExpenseDialogProps) {
           isCategoriesLoading={categoriesQuery.isLoading}
           categoriesError={
             categoriesQuery.isError
-              ? getApiErrorMessage(categoriesQuery.error)
+              ? "Failed to load categories"
               : undefined
           }
           isSubmitting={createExpenseMutation.isPending}
           submitError={
             createExpenseMutation.isError
-              ? getApiErrorMessage(createExpenseMutation.error)
+              ? "Failed to create expense"
               : undefined
           }
           onCancel={onClose}

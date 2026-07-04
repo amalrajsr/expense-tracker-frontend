@@ -6,7 +6,6 @@ import { ExpenseFilters } from "./components/expenses/ExpenseFilters";
 import { ExpenseList } from "./components/expenses/ExpenseList";
 import { useDebounce } from "./hooks/useDebounce";
 import {
-  getApiErrorMessage,
   useCategories,
   useExpenses,
   type Expense,
@@ -107,7 +106,6 @@ function App() {
               isLoading={expensesQuery.isLoading}
               isFetching={expensesQuery.isFetching}
               isError={expensesQuery.isError}
-              errorMessage={getApiErrorMessage(expensesQuery.error)}
               onDeleteRequest={setExpensePendingDelete}
             />
           </div>

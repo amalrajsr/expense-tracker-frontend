@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { getApiErrorMessage, useExpenseSummary } from "../../services/expense";
+import {  useExpenseSummary } from "../../services/expense";
 
 type CategorySummaryProps = {
   className?: string;
@@ -46,7 +46,7 @@ export function CategorySummary({
 
       {summaryQuery.isError ? (
         <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-          {getApiErrorMessage(summaryQuery.error)}
+          Failed to load category summary
         </div>
       ) : null}
 
